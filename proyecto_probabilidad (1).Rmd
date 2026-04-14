@@ -1,0 +1,203 @@
+---
+title: "Proyecto de Probabilidad y Estadística"
+author: "Autor"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Introducción
+
+Este proyecto aborda dos problemas fundamentales de probabilidad:
+
+1.  Selección de estudiantes (combinatoria)
+2.  Lanzamiento de dos dados (variable aleatoria discreta)
+
+Se analizan tanto desde un enfoque teórico como mediante simulación.
+
+# PARTE 1: COMBINATORIA Y PROBABILIDAD
+
+## Estructura de datos
+
+```{r}
+mujeres <- c("MA", "MB", "MC", "MD")
+hombres <- c("HA", "HB", "HC", "HD", "HE", "HF")
+estudiantes <- c(mujeres, hombres)
+
+length(estudiantes)
+```
+
+## Espacio muestral
+
+```{r}
+espacio_muestral <- combn(estudiantes, 3, simplify = FALSE)
+espacio_muestral_str <- sapply(espacio_muestral, function(x) paste(sort(x), collapse = "-"))
+
+length(espacio_muestral)
+head(espacio_muestral_str)
+```
+
+## Funciones auxiliares
+
+```{r}
+contar_mujeres <- function(muestra) {
+  sum(muestra %in% mujeres)
+}
+
+contiene_A_y_D <- function(muestra) {
+  "MA" %in% muestra && "MD" %in% muestra
+}
+```
+
+## Clasificación
+
+```{r}
+clasificacion <- data.frame(
+  muestra = espacio_muestral_str,
+  num_mujeres = sapply(espacio_muestral, contar_mujeres),
+  tiene_A_y_D = sapply(espacio_muestral, contiene_A_y_D)
+)
+
+head(clasificacion)
+```
+
+## Probabilidades
+
+```{r}
+prob_dos_mujeres <- mean(clasificacion$num_mujeres == 2)
+prob_al_menos_una <- mean(clasificacion$num_mujeres >= 1)
+prob_cero_mujeres <- mean(clasificacion$num_mujeres == 0)
+prob_sin_A_y_D <- mean(!clasificacion$tiene_A_y_D)
+
+c(prob_dos_mujeres,
+  prob_al_menos_una,
+  prob_cero_mujeres,
+  prob_sin_A_y_D)
+```
+
+## Resumen
+
+```{r}
+resumen1 <- data.frame(
+  Condicion = c("Exactamente 2 mujeres", 
+                "Al menos 1 mujer", 
+                "Sin mujeres", 
+                "MA y MD NO juntas"),
+  Probabilidad = c(prob_dos_mujeres, prob_al_menos_una, prob_cero_mujeres, prob_sin_A_y_D)
+)
+
+resumen1
+```
+
+## Simulación
+
+```{r}
+set.seed(123)
+n_sim <- 100000
+
+resultados_sim <- replicate(n_sim, sample(estudiantes, 3))
+
+mean(apply(resultados_sim, 2, contar_mujeres) == 2)
+```
+
+## Visualización
+
+```{r}
+tabla <- table(clasificacion$num_mujeres)
+
+barplot(tabla,
+        main = "Distribución del número de mujeres",
+        xlab = "Número de mujeres",
+        ylab = "Frecuencia")
+```
+
+# PARTE 2: LANZAMIENTO DE DOS DADOS
+
+## Espacio muestral
+
+```{r}
+dado1 <- 1:6
+dado2 <- 1:6
+
+espacio_muestral_dados <- expand.grid(Dado1 = dado1, Dado2 = dado2)
+espacio_muestral_dados$Suma <- espacio_muestral_dados$Dado1 + espacio_muestral_dados$Dado2
+
+head(espacio_muestral_dados)
+```
+
+## Distribución de probabilidad
+
+```{r}
+tabla_frecuencias <- table(espacio_muestral_dados$Suma)
+valores_W <- as.numeric(names(tabla_frecuencias))
+frecuencias <- as.numeric(tabla_frecuencias)
+
+probabilidades <- frecuencias / sum(frecuencias)
+prob_acumulada <- cumsum(probabilidades)
+
+dist_W <- data.frame(
+  W = valores_W,
+  Probabilidad = probabilidades,
+  Acumulada = prob_acumulada
+)
+
+dist_W
+```
+
+## Visualizaciones
+
+```{r}
+barplot(probabilidades,
+        names.arg = valores_W,
+        main = "Función de Probabilidad P(W=w)",
+        xlab = "Suma",
+        ylab = "Probabilidad")
+```
+
+```{r}
+plot(valores_W, prob_acumulada, type = "s",
+     main = "Distribución Acumulada",
+     xlab = "W",
+     ylab = "F(W)")
+```
+
+## Medidas estadísticas
+
+```{r}
+valor_esperado <- sum(valores_W * probabilidades)
+varianza <- sum((valores_W - valor_esperado)^2 * probabilidades)
+desviacion <- sqrt(varianza)
+
+valor_esperado
+varianza
+desviacion
+```
+
+## Simulación
+
+```{r}
+set.seed(123)
+n <- 100000
+
+d1 <- sample(1:6, n, replace = TRUE)
+d2 <- sample(1:6, n, replace = TRUE)
+
+sumas <- d1 + d2
+
+mean(sumas)
+var(sumas)
+sd(sumas)
+```
+
+# Conclusiones
+
+-   Los resultados teóricos coinciden con las simulaciones.
+-   En combinatoria se aplican coeficientes binomiales.
+-   En los dados, 7 es el valor más probable.
