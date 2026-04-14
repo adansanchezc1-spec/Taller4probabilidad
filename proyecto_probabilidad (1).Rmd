@@ -1,6 +1,6 @@
 ---
-title: "Proyecto de Probabilidad y Estadística"
-author: "Autor"
+title: "Taller 5 Probabilidad G02 CD"
+author: "Adan Yesid Sanchez Cubillos"
 date: "`r Sys.Date()`"
 output:
   pdf_document:
@@ -204,3 +204,5 @@ sd(sumas)
 -   Los resultados teóricos coinciden con las simulaciones.
 -   En combinatoria se aplican coeficientes binomiales.
 -   En los dados, 7 es el valor más probable.
+-Agente de IA usado para codificar el Markdown en Tex es Claude Haiku de Vsc, ya que se desarrolló markdown en Vsc.
+- Todo el desarrollo en R se encuentra en este repositorio:"https://github.com/adansanchezc1-spec/Taller4probabilidad"
